@@ -8,8 +8,8 @@
 
 import UIKit
 
+/// A common protocol that message table view cells should conform to.
 protocol MessageCell: class {
   var message: Message? { get set }
   var showsAvatar: Bool { get set }
-  var showsDeliveryStatus: Bool { get set }
 }

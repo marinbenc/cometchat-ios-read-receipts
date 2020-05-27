@@ -71,22 +71,9 @@ final class ChatViewController: UIViewController {
       let isFromReceiver = message.user == self.receiver
       if !message.isIncoming || isFromReceiver {
         self.messages.append(message)
-        ChatService.shared.markAsRead(message: message)
         self.scrollToLastCell()
       }
     }
-    
-    ChatService.shared.onMessageStatusChanged = { [weak self] messageID, status in
-      guard
-        let self = self,
-        let messageIndex = self.messages.firstIndex(where: { $0.id == messageID })
-      else {
-        return
-      }
-      
-      self.messages[messageIndex].deliveryStatus = status
-    }
-    
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -96,10 +83,6 @@ final class ChatViewController: UIViewController {
     ChatService.shared.getMessages(from: receiver) { [weak self] messages in
       self?.messages = messages
       self?.scrollToLastCell()
-      
-      if let lastIncomingMessage = messages.last(where: { $0.isIncoming }) {
-        ChatService.shared.markAsRead(message: lastIncomingMessage)
-      }
     }
   }
   
@@ -217,7 +200,6 @@ extension ChatViewController: UITableViewDataSource {
     cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     
     let message = messages[indexPath.row]
-    
     // Dequeue either an incoming message cell, or outgoing, depending on
     // if the message is incoming or not.
     let cellIdentifier = message.isIncoming ?
@@ -240,10 +222,7 @@ extension ChatViewController: UITableViewDataSource {
     } else {
       cell.showsAvatar = true
     }
-    
-    // Show delivery status if this is the last cell and its outgoing
-    cell.showsDeliveryStatus = indexPath.row == messages.count - 1 && !message.isIncoming
-    
+        
     return cell
   }
   

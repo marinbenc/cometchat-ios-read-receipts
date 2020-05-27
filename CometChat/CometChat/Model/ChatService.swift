@@ -48,9 +48,8 @@ final class ChatService {
   var onReceivedMessage: ((Message)-> Void)?
   /// A callback called when the user goes online or offline.
   var onUserStatusChanged: ((User)-> Void)?
-  /// A callback called when the message becomes delivered or read.
-  var onMessageStatusChanged: ((_ messageID: String, Message.DeliveryStatus)-> Void)?
   
+  /// Logs the user into CometChat.
   func login(email: String, onComplete: @escaping (Result<User, Error>)-> Void) {
     CometChat.messagedelegate = self
     CometChat.userdelegate = self
@@ -77,6 +76,7 @@ final class ChatService {
       })
   }
   
+  /// Sends a message to CometChat.
   func send(message: String, to receiver: User) {
     guard let user = user else {
       return
@@ -143,12 +143,11 @@ final class ChatService {
     
     messagesRequest!.fetchPrevious(
       onSuccess: { fetchedMessages in
-        print("Fetched \(fetchedMessages?.count ?? 0) older messages")
         guard let fetchedMessages = fetchedMessages else {
           onComplete([])
           return
         }
-        
+
         let messages = fetchedMessages
           // Grab only text messages
           .compactMap { $0 as? TextMessage }
@@ -165,32 +164,12 @@ final class ChatService {
       })
   }
   
-  func markAsRead(message: Message) {
-    guard let messageID = Int(message.id) else {
-      return
-    }
-    
-    CometChat.markAsRead(messageId: messageID, receiverId: message.user.id, receiverType: .user)
-  }
-  
 }
 
 extension ChatService: CometChatMessageDelegate {
   func onTextMessageReceived(textMessage: TextMessage) {
     DispatchQueue.main.async {
       self.onReceivedMessage?(Message(textMessage, isIncoming: true))
-    }
-  }
-  
-  func onMessagesDelivered(receipt: MessageReceipt) {
-    DispatchQueue.main.async {
-      self.onMessageStatusChanged?(receipt.messageId, .delivered)
-    }
-  }
-  
-  func onMessagesRead(receipt: MessageReceipt) {
-    DispatchQueue.main.async {
-      self.onMessageStatusChanged?(receipt.messageId, .read)
     }
   }
 }

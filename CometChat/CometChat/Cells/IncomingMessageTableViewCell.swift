@@ -38,24 +38,6 @@ class IncomingMessageTableViewCell: UITableViewCell, MessageCell {
       
       contentLabel.text = message.content
       userImage.kf.setImage(with: message.user.image)
-            
-      var deliveryText: String?
-      var deliveryIcon: UIImage?
-      
-      switch message.deliveryStatus {
-      case .delivered:
-        deliveryIcon = #imageLiteral(resourceName: "checkmark_single").withRenderingMode(.alwaysTemplate)
-        deliveryText = "Delivered"
-      case .read:
-        deliveryIcon = #imageLiteral(resourceName: "checkmark_double").withRenderingMode(.alwaysTemplate)
-        deliveryText = "Read"
-      case .unknown:
-        break
-      }
-      
-      deliveryStatusStackView.isHidden = deliveryText == nil
-      deliveryStatusLabel.text = deliveryText
-      deliveryStatusIcon.image = deliveryIcon
     }
   }
   
@@ -64,12 +46,6 @@ class IncomingMessageTableViewCell: UITableViewCell, MessageCell {
       userImage.isHidden = !showsAvatar
       textBubblePointer.isHidden = !showsAvatar
       bottomMargin.constant = showsAvatar ? Constants.lastMessageBottomMargin : Constants.chainedMessagesBottomMargin
-    }
-  }
-  
-  var showsDeliveryStatus: Bool = true {
-    didSet {
-      deliveryStatusStackView.isHidden = !showsDeliveryStatus
     }
   }
   
